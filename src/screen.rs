@@ -37,6 +37,7 @@ impl Screen {
     }
     pub fn print_graphics(&mut self, graphics: Graphics) {
         let buffer = unsafe { self.buffer.as_mut().unwrap() };
+        let mut color_index = 0;
         for y in 0..graphics.height {
             for x in 0..graphics.width {
                 for x2 in 0..8 {
@@ -50,7 +51,18 @@ impl Screen {
                             / 0b10000000
                             == 1
                         {
-                            0x0F
+                            let color = graphics
+                                .color_pallete
+                                .unwrap_or(&[0])
+                                .get(
+                                    (*graphics.color_data.unwrap_or(&[0]).get(0).unwrap_or(&0)
+                                        as usize
+                                        & (0x03 << (color_index % 4) * 2))
+                                        >> (color_index % 4) * 2,
+                                )
+                                .unwrap_or(&0x0F);
+                            color_index += 1;
+                            *color
                         } else {
                             0x00
                         };
