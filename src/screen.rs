@@ -1,6 +1,6 @@
 use core::fmt::{Arguments, Write};
 
-use crate::{graphics::Graphics, shell::SHELL};
+use crate::{graphics::Graphics, print, shell::SHELL};
 
 pub static mut SCREEN: Screen = Screen::new();
 pub const SCREEN_WIDTH: usize = 320;
@@ -40,31 +40,34 @@ impl Screen {
         let mut color_index = 0;
         for y in 0..graphics.height {
             for x in 0..graphics.width {
-                for x2 in 0..8 {
-                    for h in 0..16 {
+                for h in 0..16 {
+                    for x2 in 0..8 {
                         buffer.chars[self.row * 16 + h][self.column * 8 + x2] = if ((graphics
                             .data
                             .get((y * SCREEN_WIDTH as u16 / 8 + x) as usize)
                             .unwrap_or(&[0; 16])[h as usize]
-                            & 0b10000000 >> x2)
+                            & 0x80 >> x2)
                             << x2)
-                            / 0b10000000
+                            / 0x80
                             == 1
                         {
                             let color = graphics
                                 .color_pallete
-                                .unwrap_or(&[0])
+                                .unwrap_or(&[])
                                 .get(
                                     (*graphics
                                         .color_data
-                                        .unwrap_or(&[0])
+                                        .unwrap_or(&[])
                                         .get(color_index / 4)
                                         .unwrap_or(&0)
-                                        as usize
                                         & (0x03 << (color_index % 4) * 2))
-                                        >> (color_index % 4) * 2,
+                                        as usize
+                                        >> ((color_index % 4) * 2),
                                 )
                                 .unwrap_or(&0x0F);
+                            if color_index == 0 {
+                                print!(" {}\n", color);
+                            }
                             color_index += 1;
                             *color
                         } else {
