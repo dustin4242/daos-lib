@@ -22,6 +22,6 @@ macro_rules! print_graphic {
 #[macro_export]
 macro_rules! run_command {
     ($arg:expr) => {
-        shell::run_command(shell::str_to_command!($arg));
+        shell::SHELL::run_command(shell::str_to_command!($arg));
     };
 }
