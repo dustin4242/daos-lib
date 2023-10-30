@@ -55,7 +55,11 @@ impl Screen {
                                 .color_pallete
                                 .unwrap_or(&[0])
                                 .get(
-                                    (*graphics.color_data.unwrap_or(&[0]).get(0).unwrap_or(&0)
+                                    (*graphics
+                                        .color_data
+                                        .unwrap_or(&[0])
+                                        .get(color_index / 4)
+                                        .unwrap_or(&0)
                                         as usize
                                         & (0x03 << (color_index % 4) * 2))
                                         >> (color_index % 4) * 2,
