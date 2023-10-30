@@ -19,7 +19,7 @@ impl Shell {
             Commands::Lain => println!("Let's All Love Lain"),
             Commands::Cat => {
                 let graphic = graphics::cat_graphic();
-                print_graphic!(graphic);
+                print_graphic!(crate::graphics::load_gf(graphic));
                 println!(":3");
             }
             Commands::Unknown => println!("Unknown Command"),

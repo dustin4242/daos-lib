@@ -1,10 +1,10 @@
 use core::fmt::{Arguments, Write};
 
-use crate::shell::SHELL;
+use crate::{graphics::Graphics, shell::SHELL};
 
 pub static mut SCREEN: Screen = Screen::new();
 pub const SCREEN_WIDTH: usize = 320;
-const SCREEN_HEIGHT: usize = 192;
+pub const SCREEN_HEIGHT: usize = 192;
 
 struct Buffer {
     chars: [[u8; SCREEN_WIDTH]; SCREEN_HEIGHT],
@@ -35,15 +35,25 @@ impl Screen {
         self.chars[self.row][self.column] = byte;
         self.inc_pos();
     }
-    pub fn print_graphic(&mut self, bytes: [u8; 16]) {
+    pub fn print_graphics(&mut self, graphics: Graphics) {
         let buffer = unsafe { self.buffer.as_mut().unwrap() };
-        for y in 0..16 {
-            for x in 0..8 {
-                buffer.chars[self.row * 16 + y][self.column * 8 + x] =
-                    ((bytes[y] & 0x80 >> x) << x) / 0x80 * self.color;
+        for y in 0..graphics.height {
+            for x in 0..graphics.width {
+                for x2 in 0..8 {
+                    for h in 0..16 {
+                        buffer.chars[self.row * 16 + h][self.column * 8 + x2] = ((graphics
+                            .data
+                            .get((y * SCREEN_WIDTH as u16 / 8 + x) as usize)
+                            .unwrap_or(&[0; 16])[h as usize]
+                            & 0b10000000 >> x2)
+                            << x2)
+                            / 0b10000000
+                            * 0x0F;
+                    }
+                }
+                self.inc_pos();
             }
         }
-        self.inc_pos();
     }
     fn newline(&mut self) {
         self.column = 0;

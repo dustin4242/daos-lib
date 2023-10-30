@@ -16,7 +16,7 @@ macro_rules! print {
 #[macro_export]
 macro_rules! print_graphic {
     ($arg:expr) => {
-        unsafe { crate::screen::SCREEN.print_graphic($arg) }
+        unsafe { crate::screen::SCREEN.print_graphics($arg) }
     };
 }
 #[macro_export]
