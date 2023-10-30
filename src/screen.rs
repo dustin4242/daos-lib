@@ -41,14 +41,19 @@ impl Screen {
             for x in 0..graphics.width {
                 for x2 in 0..8 {
                     for h in 0..16 {
-                        buffer.chars[self.row * 16 + h][self.column * 8 + x2] = ((graphics
+                        buffer.chars[self.row * 16 + h][self.column * 8 + x2] = if ((graphics
                             .data
                             .get((y * SCREEN_WIDTH as u16 / 8 + x) as usize)
                             .unwrap_or(&[0; 16])[h as usize]
                             & 0b10000000 >> x2)
                             << x2)
                             / 0b10000000
-                            * 0x0F;
+                            == 1
+                        {
+                            0x0F
+                        } else {
+                            0x00
+                        };
                     }
                 }
                 self.inc_pos();
