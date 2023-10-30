@@ -1,6 +1,6 @@
 #![no_std]
 
-mod modules {
+pub mod modules {
     pub mod graphics;
     pub mod screen;
     pub mod shell;
