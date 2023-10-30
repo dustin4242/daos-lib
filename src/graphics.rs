@@ -28,7 +28,7 @@ pub fn load_gf(graphic: &'static [u8]) -> Graphics {
             for h in 0..16 {
                 character[h] = *graphical_data
                     .get((y * width * 16) as usize + (h * width as usize) + x as usize)
-                    .unwrap_or(&0x0F);
+                    .unwrap_or(&0x00);
             }
             data[(y * width + x) as usize] = character;
         }
