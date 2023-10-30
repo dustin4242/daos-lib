@@ -7,7 +7,7 @@ pub mod shell;
 #[macro_export]
 macro_rules! println {
     () => (print!("\n"));
-    ($($arg:tt)*) => (crate::print!("{}\n", format_args!($($arg)*)));
+    ($($arg:tt)*) => (print!("{}\n", format_args!($($arg)*)));
 }
 #[macro_export]
 macro_rules! print {
