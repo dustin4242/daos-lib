@@ -1,7 +1,4 @@
-use crate::{
-    modules::{graphics, screen::SCREEN_WIDTH},
-    print, print_graphic, println,
-};
+use crate::{graphics, print, print_graphic, println, screen::SCREEN_WIDTH};
 
 pub static mut SHELL: Shell = Shell::new();
 

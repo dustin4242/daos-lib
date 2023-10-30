@@ -1,6 +1,6 @@
 use core::fmt::{Arguments, Write};
 
-use crate::modules::shell::SHELL;
+use crate::shell::SHELL;
 
 pub static mut SCREEN: Screen = Screen::new();
 pub const SCREEN_WIDTH: usize = 320;
