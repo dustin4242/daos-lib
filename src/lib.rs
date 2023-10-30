@@ -1,8 +1,8 @@
 #![no_std]
 
-mod graphics;
-mod screen;
-mod shell;
+pub mod graphics;
+pub mod screen;
+pub mod shell;
 
 #[macro_export]
 macro_rules! println {
