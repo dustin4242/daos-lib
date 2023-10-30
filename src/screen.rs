@@ -1,6 +1,6 @@
 use core::fmt::{Arguments, Write};
 
-use crate::{graphics::Graphics, print, shell::SHELL};
+use crate::{graphics::Graphics, shell::SHELL};
 
 pub static mut SCREEN: Screen = Screen::new();
 pub const SCREEN_WIDTH: usize = 320;
@@ -65,9 +65,6 @@ impl Screen {
                                         >> ((color_index % 4) * 2),
                                 )
                                 .unwrap_or(&0x0F);
-                            if color_index == 0 {
-                                print!(" {}\n", color);
-                            }
                             color_index += 1;
                             *color
                         } else {
