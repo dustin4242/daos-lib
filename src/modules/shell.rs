@@ -1,4 +1,7 @@
-use crate::{graphics, print, print_graphic, println, screen::SCREEN_WIDTH};
+use crate::{
+    modules::{graphics, screen::SCREEN_WIDTH},
+    print, print_graphic, println,
+};
 
 pub static mut SHELL: Shell = Shell::new();
 
@@ -7,7 +10,6 @@ pub struct Shell {
     pub command_running: bool,
     pub read_keys: bool,
 }
-#[allow(dead_code)]
 impl Shell {
     pub fn initialize_shell(&mut self) {
         print!("> ");

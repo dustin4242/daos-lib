@@ -1,6 +1,6 @@
 use core::fmt::{Arguments, Write};
 
-use crate::shell::SHELL;
+use crate::modules::shell::SHELL;
 
 pub static mut SCREEN: Screen = Screen::new();
 pub const SCREEN_WIDTH: usize = 320;
@@ -16,7 +16,6 @@ pub struct Screen {
     buffer: *mut Buffer,
     color: u8,
 }
-#[allow(dead_code)]
 impl Screen {
     fn print(&mut self, string: &str) {
         for &ascii in string.as_bytes() {

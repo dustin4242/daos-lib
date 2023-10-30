@@ -1,8 +1,10 @@
 #![no_std]
 
-pub mod graphics;
-pub mod screen;
-pub mod shell;
+mod modules {
+    pub mod graphics;
+    pub mod screen;
+    pub mod shell;
+}
 
 #[macro_export]
 macro_rules! println {
@@ -11,12 +13,12 @@ macro_rules! println {
 }
 #[macro_export]
 macro_rules! print {
-    ($($arg:tt)*) => (crate::screen::_print(format_args!($($arg)*)));
+    ($($arg:tt)*) => (crate::modules::screen::_print(format_args!($($arg)*)));
 }
 #[macro_export]
 macro_rules! print_graphic {
     ($arg:expr) => {
-        unsafe { crate::screen::SCREEN.print_graphic($arg) }
+        unsafe { crate::modules::screen::SCREEN.print_graphic($arg) }
     };
 }
 #[macro_export]
