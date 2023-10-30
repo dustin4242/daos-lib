@@ -2,9 +2,8 @@ use crate::screen::{SCREEN_HEIGHT, SCREEN_WIDTH};
 
 pub fn cat_graphic() -> &'static [u8] {
     [
-        0x00, 0x01, 0x00, 0x01, 0b00000000, 0b00000000, 0b00000111, 0b00011000, 0b00100010,
-        0b01000100, 0b00100010, 0b00011000, 0b00000110, 0b00011000, 0b00100010, 0b01000100,
-        0b00100010, 0b00011000, 0b00000111, 0b00000000,
+        0x01, 0x01, 0x00, 0x07, 0x18, 0x22, 0x44, 0x22, 0x18, 0x06, 0x18, 0x22, 0x44, 0x22, 0x18,
+        0x07, 0x00,
     ]
     .as_slice()
 }
@@ -16,9 +15,9 @@ pub struct Graphics {
 }
 
 pub fn load_gf(graphic: &'static [u8]) -> Graphics {
-    let width: u16 = ((graphic[0] as u16) << 8) + graphic[1] as u16;
-    let height: u16 = ((graphic[2] as u16) << 8) + graphic[3] as u16;
-    let graphical_data = graphic.get(4..).unwrap();
+    let width: u16 = graphic[0] as u16;
+    let height: u16 = graphic[1] as u16;
+    let graphical_data = graphic.get(2..).unwrap();
     let mut data: [[u8; 16]; SCREEN_WIDTH / 8 * SCREEN_HEIGHT / 16] =
         [[0; 16]; SCREEN_WIDTH / 8 * SCREEN_HEIGHT / 16];
     for y in 0..height {
