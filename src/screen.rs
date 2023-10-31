@@ -1,5 +1,7 @@
 use core::fmt::{Arguments, Write};
 
+use psf_rs::Font;
+
 use crate::{graphics::Graphics, shell::SHELL};
 
 pub static mut SCREEN: Screen = Screen::new();
@@ -13,6 +15,7 @@ pub struct Screen {
     pub chars: [[u8; SCREEN_WIDTH / 8]; SCREEN_HEIGHT / 16],
     pub column: usize,
     pub row: usize,
+    pub font: Option<Font>,
     buffer: *mut Buffer,
     color: u8,
 }
@@ -26,12 +29,17 @@ impl Screen {
         if unsafe { SHELL.command_input } && self.column == SCREEN_WIDTH / 8 - 1 {
             return;
         }
-        let font = psf_rs::Font::load(include_bytes!("./font.psfu"));
+
+        let Some(font) = self.font.as_ref() else {
+            return;
+        };
         let buffer = unsafe { self.buffer.as_mut().unwrap() };
+
         font.get_char(byte as char, |bit, x, y| {
             buffer.chars[self.row * 16 + y as usize][self.column * 8 + x as usize] =
                 bit * self.color;
         });
+
         self.chars[self.row][self.column] = byte;
         self.inc_pos();
     }
@@ -59,7 +67,7 @@ impl Screen {
                                         .color_data
                                         .unwrap_or(&[])
                                         .get(color_index / 4)
-                                        .unwrap_or(&0)
+                                        .unwrap_or(&0x00)
                                         & (0x03 << (color_index % 4) * 2))
                                         as usize
                                         >> ((color_index % 4) * 2),
@@ -175,6 +183,7 @@ impl Screen {
             chars: [[0; SCREEN_WIDTH / 8]; SCREEN_HEIGHT / 16],
             column: 0,
             row: 0,
+            font: None,
             buffer: 0xa0000 as *mut Buffer,
             color: 0x0F,
         }
