@@ -74,6 +74,7 @@ impl Screen {
                 }
                 self.inc_pos();
             }
+            self.newline();
         }
     }
     fn newline(&mut self) {
