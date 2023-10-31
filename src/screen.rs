@@ -33,7 +33,9 @@ impl Screen {
             return;
         }
 
-        let Some(font) = (unsafe { &SCREEN.font }) else { return };
+        let Some(font) = (unsafe { &SCREEN.font }) else {
+            return;
+        };
         let buffer = unsafe { self.buffer.as_mut().unwrap() };
 
         font.get_char(byte as char, |bit, x, y| {

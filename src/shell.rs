@@ -21,7 +21,7 @@ impl Shell {
                 let graphic = graphics::cat_graphic();
                 print_graphic!(crate::graphics::load_gf(graphic));
                 println!(":3");
-            },
+            }
             Commands::Unknown => println!("Unknown Command"),
         }
         self.command_running = false;
