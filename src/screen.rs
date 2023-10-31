@@ -47,6 +47,9 @@ impl Screen {
         let buffer = unsafe { self.buffer.as_mut().unwrap() };
         let mut color_index = 0;
         for y in 0..graphics.height {
+            if y != 0 {
+                self.newline();
+            }
             for x in 0..graphics.width {
                 for h in 0..16 {
                     for x2 in 0..8 {
@@ -82,7 +85,6 @@ impl Screen {
                 }
                 self.inc_pos();
             }
-            self.newline();
         }
     }
     fn newline(&mut self) {
