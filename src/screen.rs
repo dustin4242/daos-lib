@@ -34,9 +34,8 @@ impl Screen {
         }
         let buffer = unsafe { self.buffer.as_mut().unwrap() };
 
-        let Some(font) = (unsafe { &SCREEN.font }) else {
-            panic!("using font before shell is initialized")
-        };
+        let Some(font) = (unsafe { &SCREEN.font }) else { return };
+
         font.get_char(byte as char, |bit, x, y| {
             buffer.chars[self.row * 16 + y as usize][self.column * 8 + x as usize] =
                 bit * self.color;
