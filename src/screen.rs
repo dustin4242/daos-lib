@@ -1,7 +1,4 @@
-use core::{
-    fmt::{Arguments, Write},
-    panic,
-};
+use core::fmt::{Arguments, Write};
 
 use psf_rs::Font;
 
@@ -33,7 +30,7 @@ impl Screen {
             return;
         }
 
-        let Some(font) = (unsafe { &SCREEN.font }) else {
+        let Some(font) = self.font.as_ref() else {
             return;
         };
         let buffer = unsafe { self.buffer.as_mut().unwrap() };
@@ -184,8 +181,8 @@ impl Screen {
         Screen {
             chars: [[0; SCREEN_WIDTH / 8]; SCREEN_HEIGHT / 16],
             column: 0,
-            font: None,
             row: 0,
+            font: None,
             buffer: 0xa0000 as *mut Buffer,
             color: 0x0F,
         }
