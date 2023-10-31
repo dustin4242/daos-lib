@@ -15,6 +15,7 @@ pub struct Screen {
     pub row: usize,
     buffer: *mut Buffer,
     color: u8,
+    font: Option<psf_rs::Font>,
 }
 impl Screen {
     fn print(&mut self, string: &str) {
@@ -26,14 +27,18 @@ impl Screen {
         if unsafe { SHELL.command_input } && self.column == SCREEN_WIDTH / 8 - 1 {
             return;
         }
-        let font = psf_rs::Font::load(include_bytes!("./font.psfu"));
-        let buffer = unsafe { self.buffer.as_mut().unwrap() };
-        font.get_char(byte as char, |bit, x, y| {
-            buffer.chars[self.row * 16 + y as usize][self.column * 8 + x as usize] =
-                bit * self.color;
-        });
-        self.chars[self.row][self.column] = byte;
-        self.inc_pos();
+        match self.font.as_ref() {
+            Some(f) => {
+                let buffer = unsafe { self.buffer.as_mut().unwrap() };
+                f.get_char(byte as char, |bit, x, y| {
+                    buffer.chars[self.row * 16 + y as usize][self.column * 8 + x as usize] =
+                        bit * self.color;
+                });
+                self.chars[self.row][self.column] = byte;
+                self.inc_pos();
+            }
+            None => (),
+        }
     }
     pub fn print_graphics(&mut self, graphics: Graphics) {
         let buffer = unsafe { self.buffer.as_mut().unwrap() };
@@ -176,6 +181,7 @@ impl Screen {
             row: 0,
             buffer: 0xa0000 as *mut Buffer,
             color: 0x0F,
+            font: None,
         }
     }
 }
