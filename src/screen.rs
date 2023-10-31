@@ -15,7 +15,7 @@ pub struct Screen {
     pub row: usize,
     buffer: *mut Buffer,
     color: u8,
-    font: Option<psf_rs::Font>,
+    pub font: Option<psf_rs::Font>,
 }
 impl Screen {
     fn print(&mut self, string: &str) {
