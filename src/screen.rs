@@ -1,4 +1,9 @@
-use core::fmt::{Arguments, Write};
+use core::{
+    fmt::{Arguments, Write},
+    panic,
+};
+
+use psf_rs::Font;
 
 use crate::{graphics::Graphics, shell::SHELL};
 
@@ -13,6 +18,7 @@ pub struct Screen {
     pub chars: [[u8; SCREEN_WIDTH / 8]; SCREEN_HEIGHT / 16],
     pub column: usize,
     pub row: usize,
+    pub font: Option<Font>,
     buffer: *mut Buffer,
     color: u8,
 }
@@ -26,12 +32,16 @@ impl Screen {
         if unsafe { SHELL.command_input } && self.column == SCREEN_WIDTH / 8 - 1 {
             return;
         }
-        let font = psf_rs::Font::load(include_bytes!("./font.psfu"));
         let buffer = unsafe { self.buffer.as_mut().unwrap() };
+
+        let Some(font) = (unsafe { &SCREEN.font }) else {
+            panic!("using font before shell is initialized")
+        };
         font.get_char(byte as char, |bit, x, y| {
             buffer.chars[self.row * 16 + y as usize][self.column * 8 + x as usize] =
                 bit * self.color;
         });
+
         self.chars[self.row][self.column] = byte;
         self.inc_pos();
     }
@@ -173,6 +183,7 @@ impl Screen {
         Screen {
             chars: [[0; SCREEN_WIDTH / 8]; SCREEN_HEIGHT / 16],
             column: 0,
+            font: None,
             row: 0,
             buffer: 0xa0000 as *mut Buffer,
             color: 0x0F,

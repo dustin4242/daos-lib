@@ -1,3 +1,5 @@
+use psf_rs::Font;
+
 use crate::{graphics, print, print_graphic, println, screen::SCREEN_WIDTH};
 
 pub static mut SHELL: Shell = Shell::new();
