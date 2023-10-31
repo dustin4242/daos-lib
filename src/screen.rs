@@ -59,7 +59,7 @@ impl Screen {
                                         .color_data
                                         .unwrap_or(&[])
                                         .get(color_index / 4)
-                                        .unwrap_or(&0)
+                                        .unwrap_or(&0x00)
                                         & (0x03 << (color_index % 4) * 2))
                                         as usize
                                         >> ((color_index % 4) * 2),
