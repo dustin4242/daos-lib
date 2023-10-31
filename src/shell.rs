@@ -1,5 +1,3 @@
-use psf_rs::Font;
-
 use crate::{graphics, print, print_graphic, println, screen::SCREEN_WIDTH};
 
 pub static mut SHELL: Shell = Shell::new();
@@ -23,7 +21,7 @@ impl Shell {
                 let graphic = graphics::cat_graphic();
                 print_graphic!(crate::graphics::load_gf(graphic));
                 println!(":3");
-            }
+            },
             Commands::Unknown => println!("Unknown Command"),
         }
         self.command_running = false;

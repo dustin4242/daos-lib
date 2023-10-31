@@ -32,9 +32,9 @@ impl Screen {
         if unsafe { SHELL.command_input } && self.column == SCREEN_WIDTH / 8 - 1 {
             return;
         }
-        let buffer = unsafe { self.buffer.as_mut().unwrap() };
 
         let Some(font) = (unsafe { &SCREEN.font }) else { return };
+        let buffer = unsafe { self.buffer.as_mut().unwrap() };
 
         font.get_char(byte as char, |bit, x, y| {
             buffer.chars[self.row * 16 + y as usize][self.column * 8 + x as usize] =
