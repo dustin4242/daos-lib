@@ -1,4 +1,9 @@
-use core::fmt::{Arguments, Write};
+use core::{
+    fmt::{Arguments, Write},
+    panic,
+};
+
+use psf_rs::Font;
 
 use crate::{graphics::Graphics, shell::SHELL};
 
@@ -13,9 +18,9 @@ pub struct Screen {
     pub chars: [[u8; SCREEN_WIDTH / 8]; SCREEN_HEIGHT / 16],
     pub column: usize,
     pub row: usize,
+    pub font: Option<Font>,
     buffer: *mut Buffer,
     color: u8,
-    pub font: Option<psf_rs::Font>,
 }
 impl Screen {
     fn print(&mut self, string: &str) {
@@ -27,18 +32,19 @@ impl Screen {
         if unsafe { SHELL.command_input } && self.column == SCREEN_WIDTH / 8 - 1 {
             return;
         }
-        match self.font.as_ref() {
-            Some(f) => {
-                let buffer = unsafe { self.buffer.as_mut().unwrap() };
-                f.get_char(byte as char, |bit, x, y| {
-                    buffer.chars[self.row * 16 + y as usize][self.column * 8 + x as usize] =
-                        bit * self.color;
-                });
-                self.chars[self.row][self.column] = byte;
-                self.inc_pos();
-            }
-            None => (),
-        }
+
+        let Some(font) = (unsafe { &SCREEN.font }) else {
+            return;
+        };
+        let buffer = unsafe { self.buffer.as_mut().unwrap() };
+
+        font.get_char(byte as char, |bit, x, y| {
+            buffer.chars[self.row * 16 + y as usize][self.column * 8 + x as usize] =
+                bit * self.color;
+        });
+
+        self.chars[self.row][self.column] = byte;
+        self.inc_pos();
     }
     pub fn print_graphics(&mut self, graphics: Graphics) {
         let buffer = unsafe { self.buffer.as_mut().unwrap() };
@@ -178,10 +184,10 @@ impl Screen {
         Screen {
             chars: [[0; SCREEN_WIDTH / 8]; SCREEN_HEIGHT / 16],
             column: 0,
+            font: None,
             row: 0,
             buffer: 0xa0000 as *mut Buffer,
             color: 0x0F,
-            font: None,
         }
     }
 }
