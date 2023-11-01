@@ -2,7 +2,7 @@ use core::fmt::{Arguments, Write};
 
 use psf_rs::Font;
 
-use crate::{graphics::Graphics, print, shell::SHELL};
+use crate::{graphics::Graphics, shell::SHELL};
 
 pub static mut SCREEN: Screen = Screen::new();
 pub const SCREEN_WIDTH: usize = 320;
@@ -55,7 +55,7 @@ impl Screen {
                     for x2 in 0..8 {
                         buffer.chars[self.row * 16 + h][self.column * 8 + x2] = if ((graphics
                             .data
-                            .get((y * SCREEN_WIDTH as u16 / 8 + x) as usize)
+                            .get((y * graphics.width + x) as usize)
                             .unwrap_or(&[0; 16])[h as usize]
                             & 0x80 >> x2)
                             << x2)
@@ -69,26 +69,13 @@ impl Screen {
                                     (*graphics
                                         .color_data
                                         .unwrap_or(&[])
-                                        .get(color_index / 4)
+                                        .get(color_index / 2)
                                         .unwrap_or(&0x00)
-                                        & (0x03 << (color_index % 4) * 2))
+                                        & (0x03 << (color_index % 2) * 4))
                                         as usize
-                                        >> ((color_index % 4) * 2),
+                                        >> ((color_index % 2) * 4),
                                 )
                                 .unwrap_or(&0x0F);
-                            if color_index == (graphics.color_data.unwrap().len() * 2) - 1 {
-                                print!(
-                                    " {}\n",
-                                    (*graphics
-                                        .color_data
-                                        .unwrap_or(&[])
-                                        .get(color_index / 4)
-                                        .unwrap_or(&0x00)
-                                        & (0x03 << (color_index % 4) * 2))
-                                        as usize
-                                        >> ((color_index % 4) * 2),
-                                );
-                            }
                             color_index += 1;
                             *color
                         } else {
