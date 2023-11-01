@@ -15,8 +15,8 @@ pub struct Graphics {
 pub fn load_gf(graphic: &'static [u8]) -> Graphics {
     let width: u16 = graphic[0] as u16;
     let height: u16 = graphic[1] as u16;
-    let graphical_data = graphic.get(2..(width * 15 * height) as usize + 1).unwrap();
-    let mut color_index = (width * 15 * height + 3) as usize;
+    let graphical_data = graphic.get(2..(width + height * 16) as usize + 1).unwrap();
+    let mut color_index = (width + height * 16) as usize + 1;
     let color_pallete = graphic.get(color_index..color_index + 4);
     color_index += 4;
     let color_data = graphic.get(color_index..);

@@ -2,7 +2,7 @@ use core::fmt::{Arguments, Write};
 
 use psf_rs::Font;
 
-use crate::{graphics::Graphics, shell::SHELL};
+use crate::{graphics::Graphics, print, shell::SHELL};
 
 pub static mut SCREEN: Screen = Screen::new();
 pub const SCREEN_WIDTH: usize = 320;
@@ -76,6 +76,19 @@ impl Screen {
                                         >> ((color_index % 4) * 2),
                                 )
                                 .unwrap_or(&0x0F);
+                            if color_index == (graphics.color_data.unwrap().len() * 2) - 1 {
+                                print!(
+                                    " {}\n",
+                                    (*graphics
+                                        .color_data
+                                        .unwrap_or(&[])
+                                        .get(color_index / 4)
+                                        .unwrap_or(&0x00)
+                                        & (0x03 << (color_index % 4) * 2))
+                                        as usize
+                                        >> ((color_index % 4) * 2),
+                                );
+                            }
                             color_index += 1;
                             *color
                         } else {
