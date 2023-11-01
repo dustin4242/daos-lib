@@ -1,4 +1,7 @@
-use crate::screen::{SCREEN_HEIGHT, SCREEN_WIDTH};
+use crate::{
+    print,
+    screen::{SCREEN_HEIGHT, SCREEN_WIDTH},
+};
 
 pub fn cat_graphic() -> &'static [u8] {
     include_bytes!("./cat.gf")
@@ -15,8 +18,8 @@ pub struct Graphics {
 pub fn load_gf(graphic: &'static [u8]) -> Graphics {
     let width: u16 = graphic[0] as u16;
     let height: u16 = graphic[1] as u16;
-    let graphical_data = graphic.get(2..(width + height * 16) as usize + 1).unwrap();
-    let mut color_index = (width + height * 16) as usize + 1;
+    let graphical_data = graphic.get(2..(width * height * 16) as usize + 2).unwrap();
+    let mut color_index = (width * height * 16) as usize + 2;
     let color_pallete = graphic.get(color_index..color_index + 4);
     color_index += 4;
     let color_data = graphic.get(color_index..);
@@ -27,8 +30,8 @@ pub fn load_gf(graphic: &'static [u8]) -> Graphics {
             let mut character: [u8; 16] = [0; 16];
             for h in 0..16 {
                 character[h] = *graphical_data
-                    .get((y * width * 16) as usize + (h * width as usize) + x as usize)
-                    .unwrap_or(&0x00);
+                    .get((y * width * 16) as usize + (h * width as usize))
+                    .unwrap();
             }
             data[(y * width + x) as usize] = character;
         }
