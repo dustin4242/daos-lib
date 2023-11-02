@@ -1,6 +1,7 @@
 use core::fmt::{Arguments, Write};
 
 use psf_rs::Font;
+use x86_64::instructions::port::Port;
 
 use crate::{graphics::Graphics, shell::SHELL};
 
@@ -44,46 +45,52 @@ impl Screen {
         self.inc_pos();
     }
     pub fn print_graphics(&mut self, graphics: Graphics) {
-        let buffer = unsafe { self.buffer.as_mut().unwrap() };
+        unsafe { Port::new(0x3C8).write(0xF8 as u8) };
+        let mut data_port = Port::new(0x3C9);
+        for i in graphics.color_pallete.unwrap_or([(63, 63, 63); 8]) {
+            unsafe {
+                data_port.write(i.0);
+                data_port.write(i.1);
+                data_port.write(i.2);
+            }
+        }
         let mut color_index = 0;
         for y in 0..graphics.height {
             if y != 0 {
                 self.newline();
             }
             for x in 0..graphics.width {
-                for h in 0..16 {
-                    for x2 in 0..8 {
-                        buffer.chars[self.row * 16 + h][self.column * 8 + x2] = if ((graphics
-                            .data
-                            .get((y * SCREEN_WIDTH as u16 / 8 + x) as usize)
-                            .unwrap_or(&[0; 16])[h as usize]
-                            & 0x80 >> x2)
-                            << x2)
-                            / 0x80
-                            == 1
-                        {
-                            let color = graphics
-                                .color_pallete
-                                .unwrap_or(&[])
-                                .get(
-                                    (*graphics
-                                        .color_data
-                                        .unwrap_or(&[])
-                                        .get(color_index / 4)
-                                        .unwrap_or(&0x00)
-                                        & (0x03 << (color_index % 4) * 2))
-                                        as usize
-                                        >> ((color_index % 4) * 2),
-                                )
-                                .unwrap_or(&0x0F);
-                            color_index += 1;
-                            *color
-                        } else {
-                            0x00
-                        };
-                    }
-                }
+                self.print_graphic(&graphics, &mut color_index, y, x);
                 self.inc_pos();
+            }
+        }
+    }
+    fn print_graphic(&self, graphic: &Graphics, color_index: &mut usize, y: u16, x: u16) {
+        let buffer = unsafe { self.buffer.as_mut().unwrap() };
+        for h in 0..16 {
+            for x2 in 0..8 {
+                buffer.chars[self.row * 16 + h][self.column * 8 + x2] = if ((graphic
+                    .data
+                    .get((y * graphic.width + x) as usize)
+                    .unwrap_or(&[0; 16])[h as usize]
+                    & 0x80 >> x2)
+                    << x2)
+                    / 0x80
+                    == 1
+                {
+                    let color = 0xF8
+                        + ((*graphic
+                            .color_data
+                            .unwrap_or(&[])
+                            .get(*color_index / 2)
+                            .unwrap_or(&0)
+                            & (0x03 << (*color_index % 2) * 4))
+                            >> ((*color_index % 2) * 4));
+                    *color_index += 1;
+                    color
+                } else {
+                    0x00
+                };
             }
         }
     }

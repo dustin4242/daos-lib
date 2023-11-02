@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 psf-rs = "1.0.2"
+x86_64 = "0.14.11"
