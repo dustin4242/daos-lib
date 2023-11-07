@@ -10,7 +10,7 @@ pub const SCREEN_WIDTH: usize = 320;
 pub const SCREEN_HEIGHT: usize = 192;
 
 struct Buffer {
-    chars: [[u8; SCREEN_WIDTH]; SCREEN_HEIGHT],
+    chars: [[u32; SCREEN_WIDTH]; SCREEN_HEIGHT],
 }
 pub struct Screen {
     pub chars: [[u8; SCREEN_WIDTH / 8]; SCREEN_HEIGHT / 16],
@@ -22,11 +22,11 @@ pub struct Screen {
 }
 impl Screen {
     fn print(&mut self, string: &str) {
-        for &ascii in string.as_bytes() {
-            self.handle_ascii(ascii);
+        for utf8 in string.chars() {
+            self.handle_utf8(utf8.into());
         }
     }
-    fn print_byte(&mut self, byte: u8) {
+    fn print_utf8(&mut self, utf8: u32) {
         if unsafe { SHELL.command_input } && self.column == SCREEN_WIDTH / 8 - 1 {
             return;
         }
@@ -36,12 +36,12 @@ impl Screen {
         };
         let buffer = unsafe { self.buffer.as_mut().unwrap() };
 
-        font.get_char(byte as char, |bit, x, y| {
+        font.display_glyph(byte as char, |bit, x, y| {
             buffer.chars[self.row * 16 + y as usize][self.column * 8 + x as usize] =
                 bit * self.color;
         });
 
-        self.chars[self.row][self.column] = byte;
+        self.chars[self.row][self.column] = utf8;
         self.inc_pos();
     }
     pub fn print_graphics(&mut self, graphics: Graphics) {
@@ -159,8 +159,8 @@ impl Screen {
             self.newline()
         }
     }
-    fn handle_ascii(&mut self, ascii: u8) {
-        match ascii {
+    fn handle_utf8(&mut self, utf8: u32) {
+        match utf8 {
             0x08 => self.backspace(),
             0x09 => self.print("    "),
             0x0a => {
@@ -176,7 +176,7 @@ impl Screen {
                     crate::print!("> ");
                 }
             }
-            _ => self.print_byte(ascii),
+            _ => self.print_byte(utf8),
         }
     }
     pub fn clear_screen(&mut self) {
