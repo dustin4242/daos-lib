@@ -13,7 +13,7 @@ struct Buffer {
     chars: [[u32; SCREEN_WIDTH]; SCREEN_HEIGHT],
 }
 pub struct Screen {
-    pub chars: [[u8; SCREEN_WIDTH / 8]; SCREEN_HEIGHT / 16],
+    pub chars: [[u32; SCREEN_WIDTH / 8]; SCREEN_HEIGHT / 16],
     pub column: usize,
     pub row: usize,
     pub font: Option<Font>,
@@ -36,7 +36,7 @@ impl Screen {
         };
         let buffer = unsafe { self.buffer.as_mut().unwrap() };
 
-        font.display_glyph(byte as char, |bit, x, y| {
+        font.display_glyph(utf8, |bit, x, y| {
             buffer.chars[self.row * 16 + y as usize][self.column * 8 + x as usize] =
                 bit * self.color;
         });

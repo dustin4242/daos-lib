@@ -13,7 +13,7 @@ impl Shell {
         self.command_input = true;
         self.read_keys = true;
     }
-    pub fn run_command(&mut self, command: [u8; SCREEN_WIDTH / 8 - 3]) {
+    pub fn run_command(&mut self, command: [u32; SCREEN_WIDTH / 8 - 3]) {
         self.command_running = true;
         match Commands::command_to_enum(command) {
             Commands::Lain => println!("Let's All Love Lain"),
@@ -48,7 +48,7 @@ enum Commands {
     Unknown,
 }
 impl Commands {
-    fn command_to_enum(command: [u8; SCREEN_WIDTH / 8 - 3]) -> Commands {
+    fn command_to_enum(command: [u32; SCREEN_WIDTH / 8 - 3]) -> Commands {
         if command == crate::str_to_command!("lain") {
             Commands::Lain
         } else if command == crate::str_to_command!("cat") {
@@ -64,7 +64,7 @@ macro_rules! str_to_command {
     ($x:expr) => {{
         let mut command = [0; SCREEN_WIDTH / 8 - 3];
         for (i, c) in $x.chars().enumerate() {
-            command[i] = c as u8;
+            command[i] = c as u32;
         }
         command
     }};
