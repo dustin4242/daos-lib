@@ -61,20 +61,19 @@ impl Screen {
             }
             for x in 0..graphics.width {
                 self.print_graphic(&graphics, &mut color_index, y, x);
-                self.inc_pos();
             }
         }
     }
-    fn print_graphic(&self, graphic: &Graphics, color_index: &mut usize, y: u16, x: u16) {
+    fn print_graphic(&mut self, graphic: &Graphics, color_index: &mut usize, y: u16, x: u16) {
         let buffer = unsafe { self.buffer.as_mut().unwrap() };
         for h in 0..16 {
-            for x2 in 0..8 {
-                buffer.chars[self.row * 16 + h][self.column * 8 + x2] = if ((graphic
+            for w in 0..8 {
+                buffer.chars[self.row * 16 + h][self.column * 8 + w] = if ((graphic
                     .data
                     .get((y * graphic.width + x) as usize)
                     .unwrap_or(&[0; 16])[h as usize]
-                    & 0x80 >> x2)
-                    << x2)
+                    & 0x80 >> w)
+                    << w)
                     / 0x80
                     == 1
                 {
@@ -93,6 +92,7 @@ impl Screen {
                 };
             }
         }
+        self.inc_pos();
     }
     fn newline(&mut self) {
         self.column = 0;
@@ -179,7 +179,7 @@ impl Screen {
             _ => self.print_byte(ascii),
         }
     }
-    pub fn fill_screen(&mut self) {
+    pub fn clear_screen(&mut self) {
         let buffer = unsafe { self.buffer.as_mut().unwrap() };
         for y in 0..SCREEN_HEIGHT - 1 {
             for x in 0..SCREEN_WIDTH - 1 {
@@ -198,6 +198,11 @@ impl Screen {
         }
     }
 }
+
+pub fn load_font(bytes: &[u8]) {
+    unsafe { SCREEN.font = Some(psf_rs::Font::load(bytes)) };
+}
+
 impl core::fmt::Write for Screen {
     fn write_str(&mut self, s: &str) -> core::fmt::Result {
         self.print(s);
