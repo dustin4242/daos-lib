@@ -10,7 +10,7 @@ pub const SCREEN_WIDTH: usize = 320;
 pub const SCREEN_HEIGHT: usize = 192;
 
 struct Buffer {
-    chars: [[u32; SCREEN_WIDTH]; SCREEN_HEIGHT],
+    chars: [[8; SCREEN_WIDTH]; SCREEN_HEIGHT],
 }
 pub struct Screen {
     pub chars: [[u32; SCREEN_WIDTH / 8]; SCREEN_HEIGHT / 16],
@@ -176,7 +176,7 @@ impl Screen {
                     crate::print!("> ");
                 }
             }
-            _ => self.print_byte(utf8),
+            _ => self.print_utf8(utf8),
         }
     }
     pub fn clear_screen(&mut self) {
