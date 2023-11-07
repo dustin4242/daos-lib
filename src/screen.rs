@@ -10,7 +10,7 @@ pub const SCREEN_WIDTH: usize = 320;
 pub const SCREEN_HEIGHT: usize = 192;
 
 struct Buffer {
-    chars: [[8; SCREEN_WIDTH]; SCREEN_HEIGHT],
+    chars: [[u8; SCREEN_WIDTH]; SCREEN_HEIGHT],
 }
 pub struct Screen {
     pub chars: [[u32; SCREEN_WIDTH / 8]; SCREEN_HEIGHT / 16],
