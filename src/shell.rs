@@ -36,6 +36,12 @@ impl Shell {
     }
 }
 
+pub fn initialize_shell() {
+    unsafe {
+        SHELL.initialize_shell();
+    }
+}
+
 enum Commands {
     Lain,
     Cat,
