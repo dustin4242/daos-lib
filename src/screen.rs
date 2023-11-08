@@ -6,8 +6,8 @@ use x86_64::instructions::port::Port;
 use crate::{graphics::Graphics, shell::SHELL};
 
 pub static mut SCREEN: Screen = Screen::new();
-pub const SCREEN_WIDTH: usize = 320;
-pub const SCREEN_HEIGHT: usize = 192;
+pub const SCREEN_WIDTH: usize = 640;
+pub const SCREEN_HEIGHT: usize = 480;
 
 struct Buffer {
     chars: [[u8; SCREEN_WIDTH]; SCREEN_HEIGHT],
