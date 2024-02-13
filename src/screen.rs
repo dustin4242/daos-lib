@@ -12,15 +12,15 @@ pub const SCREEN_HEIGHT: usize = 200;
 struct Buffer {
     chars: [[u8; SCREEN_WIDTH]; SCREEN_HEIGHT],
 }
-pub struct Screen<'a> {
+pub struct Screen {
     pub chars: [[u32; SCREEN_WIDTH / 8]; SCREEN_HEIGHT / 16],
     pub column: usize,
     pub row: usize,
-    pub font: Option<Font<'a>>,
+    pub font: Option<Font>,
     buffer: *mut Buffer,
     color: u8,
 }
-impl<'a> Screen<'a> {
+impl Screen {
     fn print(&mut self, string: &str) {
         for utf8 in string.chars() {
             self.handle_utf8(utf8.into());
@@ -188,7 +188,7 @@ impl<'a> Screen<'a> {
             }
         }
     }
-    const fn new() -> Screen<'a> {
+    const fn new() -> Screen {
         Screen {
             chars: [[0; SCREEN_WIDTH / 8]; SCREEN_HEIGHT / 16],
             column: 0,
@@ -204,7 +204,7 @@ pub fn load_font(bytes: &'static [u8]) {
     unsafe { SCREEN.font = Some(psf_rs::Font::load(bytes)) };
 }
 
-impl<'a> core::fmt::Write for Screen<'a> {
+impl core::fmt::Write for Screen {
     fn write_str(&mut self, s: &str) -> core::fmt::Result {
         self.print(s);
         Ok(())
