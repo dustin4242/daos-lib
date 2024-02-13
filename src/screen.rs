@@ -7,13 +7,13 @@ use crate::{graphics::Graphics, shell::SHELL};
 
 pub static mut SCREEN: Screen = Screen::new();
 pub const SCREEN_WIDTH: usize = 320;
-pub const SCREEN_HEIGHT: usize = 192;
+pub const SCREEN_HEIGHT: usize = 200;
 
 struct Buffer {
     chars: [[u8; SCREEN_WIDTH]; SCREEN_HEIGHT],
 }
 pub struct Screen {
-    pub chars: [[u8; SCREEN_WIDTH / 8]; SCREEN_HEIGHT / 16],
+    pub chars: [[u32; SCREEN_WIDTH / 8]; SCREEN_HEIGHT / 16],
     pub column: usize,
     pub row: usize,
     pub font: Option<Font>,
@@ -22,11 +22,11 @@ pub struct Screen {
 }
 impl Screen {
     fn print(&mut self, string: &str) {
-        for &ascii in string.as_bytes() {
-            self.handle_ascii(ascii);
+        for utf8 in string.chars() {
+            self.handle_utf8(utf8.into());
         }
     }
-    fn print_byte(&mut self, byte: u8) {
+    fn print_utf8(&mut self, utf8: u32) {
         if unsafe { SHELL.command_input } && self.column == SCREEN_WIDTH / 8 - 1 {
             return;
         }
@@ -36,12 +36,12 @@ impl Screen {
         };
         let buffer = unsafe { self.buffer.as_mut().unwrap() };
 
-        font.display_glyph(byte, |bit, x, y| {
+        font.display_glyph(utf8, |bit, x, y| {
             buffer.chars[self.row * 16 + y as usize][self.column * 8 + x as usize] =
                 bit * self.color;
         });
 
-        self.chars[self.row][self.column] = byte;
+        self.chars[self.row][self.column] = utf8;
         self.inc_pos();
     }
     pub fn print_graphics(&mut self, graphics: Graphics) {
@@ -61,20 +61,19 @@ impl Screen {
             }
             for x in 0..graphics.width {
                 self.print_graphic(&graphics, &mut color_index, y, x);
-                self.inc_pos();
             }
         }
     }
-    fn print_graphic(&self, graphic: &Graphics, color_index: &mut usize, y: u16, x: u16) {
+    fn print_graphic(&mut self, graphic: &Graphics, color_index: &mut usize, y: u16, x: u16) {
         let buffer = unsafe { self.buffer.as_mut().unwrap() };
         for h in 0..16 {
-            for x2 in 0..8 {
-                buffer.chars[self.row * 16 + h][self.column * 8 + x2] = if ((graphic
+            for w in 0..8 {
+                buffer.chars[self.row * 16 + h][self.column * 8 + w] = if ((graphic
                     .data
                     .get((y * graphic.width + x) as usize)
                     .unwrap_or(&[0; 16])[h as usize]
-                    & 0x80 >> x2)
-                    << x2)
+                    & 0x80 >> w)
+                    << w)
                     / 0x80
                     == 1
                 {
@@ -93,6 +92,7 @@ impl Screen {
                 };
             }
         }
+        self.inc_pos();
     }
     fn newline(&mut self) {
         self.column = 0;
@@ -118,6 +118,7 @@ impl Screen {
     }
     fn backspace(&mut self) {
         let buffer = unsafe { self.buffer.as_mut().unwrap() };
+        #[allow(static_mut_ref)]
         let shell = unsafe { &SHELL };
         if shell.command_input {
             if self.column != 2 {
@@ -159,8 +160,8 @@ impl Screen {
             self.newline()
         }
     }
-    fn handle_ascii(&mut self, ascii: u8) {
-        match ascii {
+    fn handle_utf8(&mut self, utf8: u32) {
+        match utf8 {
             0x08 => self.backspace(),
             0x09 => self.print("    "),
             0x0a => {
@@ -176,10 +177,10 @@ impl Screen {
                     crate::print!("> ");
                 }
             }
-            _ => self.print_byte(ascii),
+            _ => self.print_utf8(utf8),
         }
     }
-    pub fn fill_screen(&mut self) {
+    pub fn clear_screen(&mut self) {
         let buffer = unsafe { self.buffer.as_mut().unwrap() };
         for y in 0..SCREEN_HEIGHT - 1 {
             for x in 0..SCREEN_WIDTH - 1 {
@@ -198,6 +199,11 @@ impl Screen {
         }
     }
 }
+
+pub fn load_font(bytes: &'static [u8]) {
+    unsafe { SCREEN.font = Some(psf_rs::Font::load(bytes)) };
+}
+
 impl core::fmt::Write for Screen {
     fn write_str(&mut self, s: &str) -> core::fmt::Result {
         self.print(s);
