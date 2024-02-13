@@ -6,21 +6,21 @@ use x86_64::instructions::port::Port;
 use crate::{graphics::Graphics, shell::SHELL};
 
 pub static mut SCREEN: Screen = Screen::new();
-pub const SCREEN_WIDTH: usize = 640;
-pub const SCREEN_HEIGHT: usize = 480;
+pub const SCREEN_WIDTH: usize = 320;
+pub const SCREEN_HEIGHT: usize = 200;
 
 struct Buffer {
     chars: [[u8; SCREEN_WIDTH]; SCREEN_HEIGHT],
 }
-pub struct Screen {
+pub struct Screen<'a> {
     pub chars: [[u32; SCREEN_WIDTH / 8]; SCREEN_HEIGHT / 16],
     pub column: usize,
     pub row: usize,
-    pub font: Option<Font>,
+    pub font: Option<Font<'a>>,
     buffer: *mut Buffer,
     color: u8,
 }
-impl Screen {
+impl<'a> Screen<'a> {
     fn print(&mut self, string: &str) {
         for utf8 in string.chars() {
             self.handle_utf8(utf8.into());
@@ -118,6 +118,7 @@ impl Screen {
     }
     fn backspace(&mut self) {
         let buffer = unsafe { self.buffer.as_mut().unwrap() };
+        #[allow(static_mut_ref)]
         let shell = unsafe { &SHELL };
         if shell.command_input {
             if self.column != 2 {
@@ -187,7 +188,7 @@ impl Screen {
             }
         }
     }
-    const fn new() -> Screen {
+    const fn new() -> Screen<'a> {
         Screen {
             chars: [[0; SCREEN_WIDTH / 8]; SCREEN_HEIGHT / 16],
             column: 0,
@@ -199,11 +200,11 @@ impl Screen {
     }
 }
 
-pub fn load_font(bytes: &[u8]) {
+pub fn load_font(bytes: &'static [u8]) {
     unsafe { SCREEN.font = Some(psf_rs::Font::load(bytes)) };
 }
 
-impl core::fmt::Write for Screen {
+impl<'a> core::fmt::Write for Screen<'a> {
     fn write_str(&mut self, s: &str) -> core::fmt::Result {
         self.print(s);
         Ok(())
